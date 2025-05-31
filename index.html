@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Rekomendasi Pemupukan</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kalkulator Rekomendasi Pemupukan</h1>
+            <p>Sistem Fuzzy Sugeno untuk Rekomendasi Pupuk Urea, SP-36, dan KCl</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="nitrogen">Nitrogen (N) dalam TON</label>
+                    <input type="number" id="nitrogen" min="0" max="10" step="0.1" placeholder="0-10 mg/kg">
+                    <div class="range-info">Rentang: Rendah (0-4), Sedang (4-7), Tinggi (7-10)</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="phosphate">Phosphate (P) dalam mg/kg</label>
+                    <input type="number" id="phosphate" min="0" max="50" step="0.1" placeholder="0-50 mg/kg">
+                    <div class="range-info">Rentang: Rendah (0-20), Sedang (20-41), Tinggi (41-50)</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="potassium">Kalium (K) dalam mg/kg</label>
+                    <input type="number" id="potassium" min="0" max="30" step="0.1" placeholder="0-30 mg/kg">
+                    <div class="range-info">Rentang: Rendah (0-10), Sedang (10-21), Tinggi (21-30)</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="area">Luas Area (Hektar)</label>
+                    <input type="number" id="area" min="0.1" step="0.1" placeholder="Luas dalam hektar" value="1">
+                </div>
+                
+                <div class="btn-group">
+                    <button id="calculate-btn">Hitung Rekomendasi</button>
+                    <button id="pdf-btn">Cetak PDF</button>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="result-section">
+                <div class="result-card">
+                    <div class="result-title">Rekomendasi Pemupukan</div>
+                    <div id="recommendation-results">
+                        <div class="placeholder-text">Masukkan nilai dan klik "Hitung Rekomendasi"</div>
+                    </div>
+                </div>
+                
+                <div class="visualization">
+                    <div class="visual-title">Visualisasi Kadar Nutrisi</div>
+                    <div class="nutrient-bars">
+                        <div class="nutrient-bar">
+                            <div class="bar-label">Nitrogen (N)</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" id="n-bar" style="height: 0%"></div>
+                            </div>
+                            <div class="bar-value" id="n-value">0 mg/kg</div>
+                        </div>
+                        <div class="nutrient-bar">
+                            <div class="bar-label">Phosphate (P)</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" id="p-bar" style="height: 0%"></div>
+                            </div>
+                            <div class="bar-value" id="p-value">0 mg/kg</div>
+                        </div>
+                        <div class="nutrient-bar">
+                            <div class="bar-label">Kalium (K)</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" id="k-bar" style="height: 0%"></div>
+                            </div>
+                            <div class="bar-value" id="k-value">0 mg/kg</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fuzzy-details" id="fuzzy-details">
+                    <div class="fuzzy-title">Detail Perhitungan Fuzzy Sugeno</div>
+                    
+                    <div class="membership-group">
+                        <div class="membership-title">Derajat Keanggotaan</div>
+                        <div class="membership-values">
+                            <div class="membership-value">
+                                <div class="membership-label">Nitrogen Rendah</div>
+                                <div class="membership-number" id="nR-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Nitrogen Sedang</div>
+                                <div class="membership-number" id="nS-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Nitrogen Tinggi</div>
+                                <div class="membership-number" id="nT-value">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="membership-group">
+                        <div class="membership-values">
+                            <div class="membership-value">
+                                <div class="membership-label">Phosphate Rendah</div>
+                                <div class="membership-number" id="pR-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Phosphate Sedang</div>
+                                <div class="membership-number" id="pS-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Phosphate Tinggi</div>
+                                <div class="membership-number" id="pT-value">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="membership-group">
+                        <div class="membership-values">
+                            <div class="membership-value">
+                                <div class="membership-label">Kalium Rendah</div>
+                                <div class="membership-number" id="kR-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Kalium Sedang</div>
+                                <div class="membership-number" id="kS-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Kalium Tinggi</div>
+                                <div class="membership-number" id="kT-value">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="membership-group">
+                        <div class="membership-title">Aturan yang Aktif (Bobot > 0)</div>
+                        <table class="rules-table" id="active-rules">
+                            <thead>
+                                <tr>
+                                    <th>Kondisi</th>
+                                    <th>Bobot</th>
+                                    <th>Urea</th>
+                                    <th>SP-36</th>
+                                    <th>KCl</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Akan diisi oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="membership-group">
+                        <div class="membership-title">Hasil Perhitungan</div>
+                        <div class="membership-values">
+                            <div class="membership-value">
+                                <div class="membership-label">Total Bobot</div>
+                                <div class="membership-number" id="totalW-value">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">Urea (kg/ha)</div>
+                                <div class="membership-number" id="urea-result">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">SP-36 (kg/ha)</div>
+                                <div class="membership-number" id="sp36-result">0.00</div>
+                            </div>
+                            <div class="membership-value">
+                                <div class="membership-label">KCl (kg/ha)</div>
+                                <div class="membership-number" id="kcl-result">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
